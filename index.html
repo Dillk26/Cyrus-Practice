@@ -1,1 +1,2253 @@
-test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cyrus's Algebra 1 — Unit 1 Tutoring Hub</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- KaTeX for crisp math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .katex-display {
+      margin: 0.5em 0 !important;
+    }
+    /* Custom scrollbar for question strip */
+    .no-scrollbar::-webkit-scrollbar {
+      height: 6px;
+    }
+    .no-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .no-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .step-card {
+      animation: slideFadeIn 0.35s ease-out forwards;
+    }
+    @keyframes slideFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    canvas#scratchpad {
+      touch-action: none;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Navigation & Progress Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-extrabold text-lg shadow-sm">
+          C
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight">Cyrus's Algebra 1 Hub</h1>
+            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+              Unit 1 Review Packet
+            </span>
+          </div>
+          <p class="text-xs text-slate-500">Interactive Step-by-Step Walkthrough & Justification Practice</p>
+        </div>
+      </div>
+
+      <!-- Progress & Score Pills -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+          <span class="text-xs font-semibold text-slate-600">Completed:</span>
+          <span id="stat-completed" class="text-sm font-bold text-slate-900">0 / 46</span>
+        </div>
+
+        <div class="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200">
+          <i data-lucide="flame" class="w-4 h-4 text-amber-500"></i>
+          <span class="text-xs font-semibold text-amber-800">Streak:</span>
+          <span id="stat-streak" class="text-sm font-bold text-amber-900">0</span>
+        </div>
+
+        <button onclick="resetAllProgress()" title="Reset Session Progress" class="text-xs text-slate-500 hover:text-rose-600 font-medium px-2.5 py-1.5 rounded-lg hover:bg-rose-50 transition">
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Worksheet Tabs -->
+    <div class="bg-slate-50 border-t border-slate-200">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 flex overflow-x-auto no-scrollbar gap-2 py-2">
+        <button onclick="switchWorksheet('ws1')" id="tab-ws1" class="ws-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-2">
+          <span>Worksheet 1: Standard #1 & #2 (ID: 1)</span>
+          <span id="badge-ws1" class="px-2 py-0.5 text-xs rounded-full bg-white/80 text-slate-700">0/10</span>
+        </button>
+        <button onclick="switchWorksheet('ws2')" id="tab-ws2" class="ws-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-2">
+          <span>Worksheet 2: Standard #1 & #2 (ID: 2)</span>
+          <span id="badge-ws2" class="px-2 py-0.5 text-xs rounded-full bg-white/80 text-slate-700">0/10</span>
+        </button>
+        <button onclick="switchWorksheet('ws3')" id="tab-ws3" class="ws-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-2">
+          <span>Worksheet 3: Unit 1 Practice (ID: 1)</span>
+          <span id="badge-ws3" class="px-2 py-0.5 text-xs rounded-full bg-white/80 text-slate-700">0/26</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="max-w-6xl mx-auto w-full flex-1 px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left/Main Column: Question Card & Explanation -->
+    <div class="lg:col-span-8 flex flex-col gap-5">
+
+      <!-- Question Number Strip -->
+      <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <span id="ws-subtitle" class="text-xs font-bold uppercase tracking-wider text-indigo-600">Worksheet 1</span>
+          <span class="text-xs text-slate-400">Click any number to jump directly</span>
+        </div>
+        <div id="question-pills" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Active Question Card -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <!-- Question Banner -->
+        <div class="bg-slate-900 text-white px-6 py-4 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-3">
+            <span id="q-number-badge" class="px-3 py-1 rounded-lg bg-indigo-500 text-white font-extrabold text-sm">
+              Question #1
+            </span>
+            <span id="q-topic-badge" class="text-xs font-medium text-slate-300 bg-slate-800 px-3 py-1 rounded-lg border border-slate-700">
+              Standard #1: Linear Equations & Justifications
+            </span>
+          </div>
+          <span id="q-status-pill" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-slate-300">
+            Not Answered Yet
+          </span>
+        </div>
+
+        <div class="p-6 sm:p-8">
+          <!-- Directions -->
+          <p id="q-directions" class="text-sm font-semibold text-slate-600 mb-3">
+            Solve the equation and select the justifications used.
+          </p>
+
+          <!-- Math Problem Display -->
+          <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-6 mb-6 flex items-center justify-center min-h-[104px]">
+            <div id="q-math-display" class="text-2xl sm:text-3xl font-bold text-slate-900 text-center">
+              <!-- KaTeX rendered here -->
+            </div>
+          </div>
+
+          <!-- Dynamic Input Area for Cyrus -->
+          <div id="q-input-container" class="space-y-5">
+            <!-- Populated dynamically by question type -->
+          </div>
+
+          <!-- Action Bar (Submit / Hint / Reveal / Next) -->
+          <div class="mt-6 pt-5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <button onclick="prevQuestion()" id="btn-prev" class="px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-sm font-semibold flex items-center gap-1.5 transition disabled:opacity-40 disabled:pointer-events-none">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Prev
+              </button>
+              <button onclick="toggleHint()" id="btn-hint" class="px-3.5 py-2.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 text-sm font-semibold flex items-center gap-1.5 transition">
+                <i data-lucide="lightbulb" class="w-4 h-4 text-amber-600"></i>
+                Hint for Cyrus
+              </button>
+            </div>
+
+            <div class="flex items-center gap-2.5">
+              <button onclick="checkAnswer()" id="btn-submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm flex items-center gap-2 transition">
+                <span>Check Answer</span>
+                <i data-lucide="check" class="w-4 h-4"></i>
+              </button>
+              <button onclick="nextQuestion()" id="btn-next" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm flex items-center gap-1.5 transition">
+                <span>Next</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Hint Box (Hidden by default) -->
+          <div id="hint-box" class="hidden mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm flex items-start gap-3">
+            <i data-lucide="sparkles" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-xs uppercase tracking-wider text-amber-700 mb-0.5">Tutor Nudge for Cyrus</div>
+              <div id="hint-text"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback & Step-by-Step Explanation Panel (Revealed after Cyrus answers) -->
+      <div id="explanation-panel" class="hidden step-card bg-white rounded-2xl border-2 border-indigo-100 shadow-sm overflow-hidden">
+        <!-- Result Header -->
+        <div id="feedback-banner" class="px-6 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div id="feedback-icon" class="w-9 h-9 rounded-xl flex items-center justify-center"></div>
+            <div>
+              <h3 id="feedback-title" class="font-extrabold text-base"></h3>
+              <p id="feedback-subtitle" class="text-xs opacity-90"></p>
+            </div>
+          </div>
+          <div id="correct-answer-badge" class="px-3.5 py-1.5 rounded-xl font-bold text-sm bg-white/90 text-slate-900 shadow-sm">
+          </div>
+        </div>
+
+        <div class="p-6 sm:p-8 space-y-6">
+          <!-- Interactive SVG Number Line (For Inequality Questions) -->
+          <div id="graph-section" class="hidden">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
+              <i data-lucide="git-commit-horizontal" class="w-4 h-4 text-indigo-600"></i>
+              Solution Graph on the Number Line
+            </h4>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center">
+              <svg id="number-line-svg" viewBox="0 0 600 90" class="w-full max-w-xl h-24 overflow-visible"></svg>
+              <p id="graph-caption" class="text-xs text-slate-600 font-medium mt-1 text-center"></p>
+            </div>
+          </div>
+
+          <!-- Step-by-Step Walkthrough Table -->
+          <div>
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
+              <i data-lucide="list-ordered" class="w-4 h-4 text-indigo-600"></i>
+              Step-by-Step Solution & Justifications
+            </h4>
+            <div id="steps-container" class="space-y-2.5">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Key Takeaway / Tutor Note -->
+          <div class="p-4 rounded-xl bg-indigo-50/70 border border-indigo-100 flex items-start gap-3">
+            <i data-lucide="graduation-cap" class="w-5 h-5 text-indigo-600 shrink-0 mt-0.5"></i>
+            <div class="text-sm text-indigo-950">
+              <span class="font-bold">Key Takeaway for Cyrus: </span>
+              <span id="takeaway-text"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Scratchpad & Quick Reference Cheat Sheet -->
+    <div class="lg:col-span-4 flex flex-col gap-5">
+
+      <!-- Digital Scratchpad for Working Out Steps -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+        <div class="px-4 py-3 bg-slate-900 text-white flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="pen-tool" class="w-4 h-4 text-indigo-400"></i>
+            <span class="text-xs font-bold uppercase tracking-wider">Cyrus's Work Pad</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="setPenColor('#0f172a')" class="w-5 h-5 rounded-full bg-slate-900 border-2 border-white ring-1 ring-slate-400" title="Black Pen"></button>
+            <button onclick="setPenColor('#4f46e5')" class="w-5 h-5 rounded-full bg-indigo-600 border-2 border-white" title="Indigo Pen"></button>
+            <button onclick="setPenColor('#e11d48')" class="w-5 h-5 rounded-full bg-rose-600 border-2 border-white" title="Red Pen"></button>
+            <button onclick="clearScratchpad()" class="ml-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded-lg transition">
+              Clear
+            </button>
+          </div>
+        </div>
+        <div class="relative w-full h-64 bg-slate-50">
+          <canvas id="scratchpad" class="w-full h-full cursor-crosshair"></canvas>
+          <div class="pointer-events-none absolute bottom-2 right-3 text-[11px] text-slate-400 select-none">
+            Draw with mouse, stylus, or finger
+          </div>
+        </div>
+        <!-- Type-Out Work Box (For keyboard users) -->
+        <div class="p-3 bg-slate-50 border-t border-slate-200">
+          <textarea id="scratch-text" rows="2" placeholder="Or type intermediate algebra steps here (e.g. -3x - 1 = -1)..." class="w-full text-xs mono p-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+      </div>
+
+      <!-- Unit 1 Quick Reference Guide -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+        <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+          <i data-lucide="book-open" class="w-4 h-4 text-indigo-600"></i>
+          <h3 class="font-extrabold text-sm text-slate-900">Unit 1 Quick Reference</h3>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-600">
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+            <div class="font-bold text-slate-900 mb-1">1. Justifications (Standard #1)</div>
+            <ul class="space-y-1 list-disc list-inside">
+              <li><span class="font-semibold text-indigo-700">Distribution:</span> Multiply outside term across parentheses, e.g. $a(b+c) = ab + ac$.</li>
+              <li><span class="font-semibold text-indigo-700">CLT (Combine Like Terms):</span> Add/subtract terms on the <em>same</em> side with the same variable.</li>
+              <li><span class="font-semibold text-indigo-700">POE (Property of Equality):</span> Add, subtract, multiply, or divide <em>both sides</em> by the same value.</li>
+            </ul>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+            <div class="font-bold text-slate-900 mb-1">2. The Golden Inequality Rule</div>
+            <p>Whenever you <strong>multiply or divide both sides by a negative number</strong>, you MUST <strong>flip</strong> the inequality sign ($<$ becomes $>$, $\le$ becomes $\ge$).</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+            <div class="font-bold text-slate-900 mb-1">3. Number Line Circles</div>
+            <div class="flex items-center gap-4 mt-1">
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full border-2 border-indigo-600 inline-block bg-white"></span> Open: $&lt;$ or $&gt;$</span>
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-indigo-600 inline-block"></span> Closed: $\le$ or $\ge$</span>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+            <div class="font-bold text-slate-900 mb-1">4. Absolute Value Rules</div>
+            <ul class="space-y-1 list-disc list-inside">
+              <li><strong>Isolate $|expression|$ first!</strong></li>
+              <li>If $|X| = \text{negative}$, there is <strong>No Solution</strong>.</li>
+              <li><strong>Less thAND ($\le, &lt;$):</strong> $-c &lt; X &lt; c$ (shaded between).</li>
+              <li><strong>GreatOR ($\ge, &gt;$):</strong> $X &gt; c \text{ or } X &lt; -c$ (shaded apart).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // =========================================================================
+    // COMPLETE QUESTION DATABASE (ALL 46 PROBLEMS FROM THE PDF PACKET)
+    // =========================================================================
+    const QUESTIONS = [
+      // -----------------------------------------------------------------------
+      // WORKSHEET 1: Unit 1 Standard #1 & 2 Practice (ID: 1) — Pages 1 & 7
+      // -----------------------------------------------------------------------
+      {
+        id: "ws1-1",
+        worksheet: "ws1",
+        number: 1,
+        topic: "Standard #1: Linear Equations & Justifications",
+        directions: "Solve the equation for x and check the justifications used.",
+        latex: "-2x - 1 - x = -1",
+        type: "equation-justify",
+        variable: "x",
+        answer: 0,
+        justifications: ["CLT", "POE"],
+        hint: "Start by combining the like x-terms on the left side: -2x and -x.",
+        steps: [
+          { math: "-2x - 1 - x = -1", reason: "Given equation" },
+          { math: "-3x - 1 = -1", reason: "Combine Like Terms (CLT): combine -2x and -x to get -3x" },
+          { math: "-3x = 0", reason: "Addition Property of Equality (POE): add 1 to both sides" },
+          { math: "x = 0", reason: "Division Property of Equality (POE): divide both sides by -3" }
+        ],
+        takeaway: "Remember that -x is -1x, so -2x - x combines to -3x (not -x!). And 0 divided by any non-zero number is 0."
+      },
+      {
+        id: "ws1-2",
+        worksheet: "ws1",
+        number: 2,
+        topic: "Standard #1: Linear Equations & Justifications",
+        directions: "Solve the equation for b and check the justifications used.",
+        latex: "b + b = -4",
+        type: "equation-justify",
+        variable: "b",
+        answer: -2,
+        justifications: ["CLT", "POE"],
+        hint: "Combine b + b on the left side first, then divide.",
+        steps: [
+          { math: "b + b = -4", reason: "Given equation" },
+          { math: "2b = -4", reason: "Combine Like Terms (CLT): 1b + 1b = 2b" },
+          { math: "b = -2", reason: "Division Property of Equality (POE): divide both sides by 2" }
+        ],
+        takeaway: "Adding a variable to itself (b + b) gives 2b. No distribution was needed since there are no parentheses."
+      },
+      {
+        id: "ws1-3",
+        worksheet: "ws1",
+        number: 3,
+        topic: "Standard #1: Linear Equations & Justifications",
+        directions: "Solve the equation for x and check the justifications used.",
+        latex: "8 + 8x = x + 8",
+        type: "equation-justify",
+        variable: "x",
+        answer: 0,
+        justifications: ["POE"],
+        hint: "Variables are on opposite sides of the equals sign! Use Subtraction POE to gather x-terms on one side.",
+        steps: [
+          { math: "8 + 8x = x + 8", reason: "Given equation" },
+          { math: "8 + 7x = 8", reason: "Subtraction Property of Equality (POE): subtract x from both sides" },
+          { math: "7x = 0", reason: "Subtraction Property of Equality (POE): subtract 8 from both sides" },
+          { math: "x = 0", reason: "Division Property of Equality (POE): divide both sides by 7" }
+        ],
+        takeaway: "When terms are on opposite sides of the '=' sign, we use Properties of Equality (POE) rather than CLT to move them across."
+      },
+      {
+        id: "ws1-4",
+        worksheet: "ws1",
+        number: 4,
+        topic: "Standard #1: Linear Equations & Justifications",
+        directions: "Solve the equation for a and check the justifications used.",
+        latex: "12 + 3a = 8 + 5a",
+        type: "equation-justify",
+        variable: "a",
+        answer: 2,
+        justifications: ["POE"],
+        hint: "Move the a-terms to one side and the constant numbers to the other side using Subtraction POE.",
+        steps: [
+          { math: "12 + 3a = 8 + 5a", reason: "Given equation" },
+          { math: "12 = 8 + 2a", reason: "Subtraction Property of Equality (POE): subtract 3a from both sides" },
+          { math: "4 = 2a", reason: "Subtraction Property of Equality (POE): subtract 8 from both sides" },
+          { math: "a = 2", reason: "Division Property of Equality (POE): divide both sides by 2" }
+        ],
+        takeaway: "Subtracting the smaller variable term (3a) keeps the coefficient positive (2a), which helps avoid negative sign errors!"
+      },
+      {
+        id: "ws1-5",
+        worksheet: "ws1",
+        number: 5,
+        topic: "Standard #1: Linear Equations & Justifications",
+        directions: "Solve the equation for k and check the justifications used.",
+        latex: "-3(2 - 3k) = -33",
+        type: "equation-justify",
+        variable: "k",
+        answer: -3,
+        justifications: ["Distribution", "POE"],
+        hint: "First distribute -3 to both terms inside the parentheses. Watch the negative times a negative!",
+        steps: [
+          { math: "-3(2 - 3k) = -33", reason: "Given equation" },
+          { math: "-6 + 9k = -33", reason: "Distributive Property (Distribution): (-3)(2) = -6 and (-3)(-3k) = +9k" },
+          { math: "9k = -27", reason: "Addition Property of Equality (POE): add 6 to both sides (-33 + 6 = -27)" },
+          { math: "k = -3", reason: "Division Property of Equality (POE): divide both sides by 9" }
+        ],
+        takeaway: "Be careful distributing a negative number: (-3)(-3k) becomes +9k, and adding 6 to -33 brings it closer to zero (-27)."
+      },
+      {
+        id: "ws1-6",
+        worksheet: "ws1",
+        number: 6,
+        topic: "Standard #1: Linear Equations & Justifications",
+        directions: "Solve the equation for r and check the justifications used.",
+        latex: "3(-3r - 2) - r = -36",
+        type: "equation-justify",
+        variable: "r",
+        answer: 3,
+        justifications: ["Distribution", "CLT", "POE"],
+        hint: "This problem uses all three! First distribute 3, then combine the r-terms on the left, then use POE.",
+        steps: [
+          { math: "3(-3r - 2) - r = -36", reason: "Given equation" },
+          { math: "-9r - 6 - r = -36", reason: "Distributive Property (Distribution): multiply 3 into (-3r - 2)" },
+          { math: "-10r - 6 = -36", reason: "Combine Like Terms (CLT): combine -9r and -r to get -10r" },
+          { math: "-10r = -30", reason: "Addition Property of Equality (POE): add 6 to both sides" },
+          { math: "r = 3", reason: "Division Property of Equality (POE): divide both sides by -10" }
+        ],
+        takeaway: "Follow the order: 1) Distribute to clear parentheses, 2) Combine Like Terms (CLT) on the same side, 3) Use POE to isolate the variable."
+      },
+      {
+        id: "ws1-7",
+        worksheet: "ws1",
+        number: 7,
+        topic: "Standard #2: One-Variable Inequalities",
+        directions: "Solve the inequality and select its solution and graph.",
+        latex: "-b + 3b \\ge 6",
+        type: "inequality-choice",
+        correctOption: 0,
+        options: [
+          { label: "b \\ge 3", desc: "Closed circle at 3, shaded right" },
+          { label: "b \\le 3", desc: "Closed circle at 3, shaded left" },
+          { label: "b > 3", desc: "Open circle at 3, shaded right" },
+          { label: "b \\ge -3", desc: "Closed circle at -3, shaded right" }
+        ],
+        graph: {
+          min: -2, max: 8,
+          type: "single",
+          val: 3, closed: true, dir: "right",
+          caption: "Closed circle at 3 (because of ≥) and shaded to the right for values greater than or equal to 3."
+        },
+        hint: "Combine -b + 3b first. Since you divide by +2, does the inequality sign flip or stay the same?",
+        steps: [
+          { math: "-b + 3b \\ge 6", reason: "Given inequality" },
+          { math: "2b \\ge 6", reason: "Combine Like Terms (CLT): -1b + 3b = 2b" },
+          { math: "b \\ge 3", reason: "Divide both sides by 2 (positive number, so sign stays \\ge)" }
+        ],
+        takeaway: "Use a CLOSED circle at 3 because the symbol is ≥ (includes equal to), and shade right since b is greater than or equal to 3."
+      },
+      {
+        id: "ws1-8",
+        worksheet: "ws1",
+        number: 8,
+        topic: "Standard #2: One-Variable Inequalities",
+        directions: "Solve the inequality and select its solution and graph.",
+        latex: "3 + k + 3 < 3",
+        type: "inequality-choice",
+        correctOption: 0,
+        options: [
+          { label: "k < -3", desc: "Open circle at -3, shaded left" },
+          { label: "k \\le -3", desc: "Closed circle at -3, shaded left" },
+          { label: "k < 3", desc: "Open circle at 3, shaded left" },
+          { label: "k > -3", desc: "Open circle at -3, shaded right" }
+        ],
+        graph: {
+          min: -7, max: 4,
+          type: "single",
+          val: -3, closed: false, dir: "left",
+          caption: "Open circle at -3 (strictly <) and shaded to the left for values less than -3."
+        },
+        hint: "Combine the two 3s on the left side first (3 + 3 = 6), then subtract 6 from both sides.",
+        steps: [
+          { math: "3 + k + 3 < 3", reason: "Given inequality" },
+          { math: "k + 6 < 3", reason: "Combine Like Terms (CLT): 3 + 3 = 6" },
+          { math: "k < -3", reason: "Subtract 6 from both sides (3 - 6 = -3)" }
+        ],
+        takeaway: "Strict inequalities (< or >) always use an OPEN circle on the number line because the boundary number itself is not a solution."
+      },
+      {
+        id: "ws1-9",
+        worksheet: "ws1",
+        number: 9,
+        topic: "Standard #2: Compound Inequalities (OR)",
+        directions: "Solve the compound inequality and select its solution and graph.",
+        latex: "2x - 2 < -2 \\quad\\text{or}\\quad 2 - 3x < -4",
+        type: "inequality-choice",
+        correctOption: 0,
+        options: [
+          { label: "x < 0 \\text{ or } x > 2", desc: "Open at 0 shaded left; Open at 2 shaded right" },
+          { label: "x < 0 \\text{ or } x < 2", desc: "Both shaded left from 0 and 2" },
+          { label: "0 < x < 2", desc: "Open circles at 0 and 2, shaded between" },
+          { label: "x \\le 0 \\text{ or } x \\ge 2", desc: "Closed at 0 shaded left; Closed at 2 shaded right" }
+        ],
+        graph: {
+          min: -5, max: 7,
+          type: "or",
+          leftVal: 0, leftClosed: false,
+          rightVal: 2, rightClosed: false,
+          caption: "Open circle at 0 shaded left (x < 0) OR open circle at 2 shaded right (x > 2)."
+        },
+        hint: "Solve each inequality separately. Watch out on the second one: you'll divide by -3, which flips the '<' to '>'!",
+        steps: [
+          { math: "2x - 2 < -2 \\implies 2x < 0 \\implies x < 0", reason: "First inequality: add 2 to both sides, then divide by 2" },
+          { math: "2 - 3x < -4 \\implies -3x < -6", reason: "Second inequality: subtract 2 from both sides" },
+          { math: "x > 2", reason: "Divide by -3 and FLIP the inequality sign from < to >" },
+          { math: "x < 0 \\text{ or } x > 2", reason: "Combine both parts with 'or'" }
+        ],
+        takeaway: "In the second inequality (-3x < -6), dividing by -3 requires flipping the inequality sign so it becomes x > 2!"
+      },
+      {
+        id: "ws1-10",
+        worksheet: "ws1",
+        number: 10,
+        topic: "Standard #2: Compound Inequalities (AND)",
+        directions: "Solve the compound inequality and select its solution and graph.",
+        latex: "n + 1 \\ge -2 \\quad\\text{and}\\quad 1 - n > 2",
+        type: "inequality-choice",
+        correctOption: 0,
+        options: [
+          { label: "-3 \\le n < -1", desc: "Closed at -3, Open at -1, shaded between" },
+          { label: "-3 < n \\le -1", desc: "Open at -3, Closed at -1, shaded between" },
+          { label: "n \\ge -3 \\text{ and } n > -1", desc: "Shaded to the right of -1" },
+          { label: "n \\le -3 \\text{ or } n > -1", desc: "Shaded outward from -3 and -1" }
+        ],
+        graph: {
+          min: -8, max: 4,
+          type: "and",
+          leftVal: -3, leftClosed: true,
+          rightVal: -1, rightClosed: false,
+          caption: "Closed circle at -3, open circle at -1, and shaded in between (-3 ≤ n < -1)."
+        },
+        hint: "Solve both parts. On '1 - n > 2', subtracting 1 gives '-n > 1'. What happens when you divide by -1?",
+        steps: [
+          { math: "n + 1 \\ge -2 \\implies n \\ge -3", reason: "First inequality: subtract 1 from both sides" },
+          { math: "1 - n > 2 \\implies -n > 1", reason: "Second inequality: subtract 1 from both sides" },
+          { math: "n < -1", reason: "Divide both sides by -1 and FLIP the sign from > to <" },
+          { math: "-3 \\le n < -1", reason: "Combine with 'and' (numbers ≥ -3 AND < -1)" }
+        ],
+        takeaway: "An 'AND' compound inequality graphs the overlap (intersection) between the two conditions: closed at -3, open at -1, shaded between."
+      },
+
+      // -----------------------------------------------------------------------
+      // WORKSHEET 2: Unit 1 Standard #1 & 2 Practice (ID: 2) — Pages 2 & 8
+      // -----------------------------------------------------------------------
+      {
+        id: "ws2-1",
+        worksheet: "ws2",
+        number: 1,
+        topic: "Standard #1: Linear Equations & Justifications",
+        directions: "Solve the equation for x and check the justifications used.",
+        latex: "x - 3x = 6",
+        type: "equation-justify",
+        variable: "x",
+        answer: -3,
+        justifications: ["CLT", "POE"],
+        hint: "Combine 1x - 3x on the left side first.",
+        steps: [
+          { math: "x - 3x = 6", reason: "Given equation" },
+          { math: "-2x = 6", reason: "Combine Like Terms (CLT): 1x - 3x = -2x" },
+          { math: "x = -3", reason: "Division Property of Equality (POE): divide both sides by -2" }
+        ],
+        takeaway: "1x - 3x = -2x. Dividing 6 by -2 gives -3."
+      },
+      {
+        id: "ws2-2",
+        worksheet: "ws2",
+        number: 2,
+        topic: "Standard #1: Linear Equations & Justifications",
+        directions: "Solve the equation for r and check the justifications used.",
+        latex: "r + 1 + 3r = 1",
+        type: "equation-justify",
+        variable: "r",
+        answer: 0,
+        justifications: ["CLT", "POE"],
+        hint: "Combine r and 3r on the left side first, then subtract 1 from both sides.",
+        steps: [
+          { math: "r + 1 + 3r = 1", reason: "Given equation" },
+          { math: "4r + 1 = 1", reason: "Combine Like Terms (CLT): r + 3r = 4r" },
+          { math: "4r = 0", reason: "Subtraction Property of Equality (POE): subtract 1 from both sides" },
+          { math: "r = 0", reason: "Division Property of Equality (POE): divide both sides by 4" }
+        ],
+        takeaway: "When 4r = 0, dividing by 4 gives r = 0 (zero is a completely valid number solution!)."
+      },
+      {
+        id: "ws2-3",
+        worksheet: "ws2",
+        number: 3,
+        topic: "Standard #1: Linear Equations & Justifications",
+        directions: "Solve the equation for r and check the justifications used.",
+        latex: "1 + 8r = 10 + 5r",
+        type: "equation-justify",
+        variable: "r",
+        answer: 3,
+        justifications: ["POE"],
+        hint: "Subtract 5r from both sides and subtract 1 from both sides using Subtraction POE.",
+        steps: [
+          { math: "1 + 8r = 10 + 5r", reason: "Given equation" },
+          { math: "1 + 3r = 10", reason: "Subtraction Property of Equality (POE): subtract 5r from both sides" },
+          { math: "3r = 9", reason: "Subtraction Property of Equality (POE): subtract 1 from both sides" },
+          { math: "r = 3", reason: "Division Property of Equality (POE): divide both sides by 3" }
+        ],
+        takeaway: "Since there are no like terms on the same side initially, we only needed Properties of Equality (POE)!"
+      },
+      {
+        id: "ws2-4",
+        worksheet: "ws2",
+        number: 4,
+        topic: "Standard #1: Linear Equations & Justifications",
+        directions: "Solve the equation for n and check the justifications used.",
+        latex: "-2n - 6 = -3 - 3n",
+        type: "equation-justify",
+        variable: "n",
+        answer: 3,
+        justifications: ["POE"],
+        hint: "Add 3n to both sides first! What is -2n + 3n?",
+        steps: [
+          { math: "-2n - 6 = -3 - 3n", reason: "Given equation" },
+          { math: "n - 6 = -3", reason: "Addition Property of Equality (POE): add 3n to both sides (-2n + 3n = 1n)" },
+          { math: "n = 3", reason: "Addition Property of Equality (POE): add 6 to both sides (-3 + 6 = 3)" }
+        ],
+        takeaway: "Adding 3n to -2n immediately gives 1n (just n), saving a division step at the end!"
+      },
+      {
+        id: "ws2-5",
+        worksheet: "ws2",
+        number: 5,
+        topic: "Standard #1: Linear Equations & Justifications",
+        directions: "Solve the equation for k and check the justifications used.",
+        latex: "-3(3k + 3) = -36",
+        type: "equation-justify",
+        variable: "k",
+        answer: 3,
+        justifications: ["Distribution", "POE"],
+        hint: "Distribute -3 into (3k + 3) to get -9k - 9 = -36, then solve for k.",
+        steps: [
+          { math: "-3(3k + 3) = -36", reason: "Given equation" },
+          { math: "-9k - 9 = -36", reason: "Distributive Property (Distribution): multiply -3 by 3k and 3" },
+          { math: "-9k = -27", reason: "Addition Property of Equality (POE): add 9 to both sides" },
+          { math: "k = 3", reason: "Division Property of Equality (POE): divide both sides by -9" }
+        ],
+        takeaway: "A negative divided by a negative (-27 ÷ -9) equals a positive (+3)."
+      },
+      {
+        id: "ws2-6",
+        worksheet: "ws2",
+        number: 6,
+        topic: "Standard #1: Linear Equations & Justifications",
+        directions: "Solve the equation for v and check the justifications used.",
+        latex: "-3(3v + 1) - 1 = -31",
+        type: "equation-justify",
+        variable: "v",
+        answer: 3,
+        justifications: ["Distribution", "CLT", "POE"],
+        hint: "Distribute -3 first: -9v - 3 - 1 = -31. Then combine the constants -3 and -1.",
+        steps: [
+          { math: "-3(3v + 1) - 1 = -31", reason: "Given equation" },
+          { math: "-9v - 3 - 1 = -31", reason: "Distributive Property (Distribution): multiply -3 into (3v + 1)" },
+          { math: "-9v - 4 = -31", reason: "Combine Like Terms (CLT): -3 - 1 = -4" },
+          { math: "-9v = -27", reason: "Addition Property of Equality (POE): add 4 to both sides" },
+          { math: "v = 3", reason: "Division Property of Equality (POE): divide both sides by -9" }
+        ],
+        takeaway: "Only distribute -3 to the terms inside the parentheses (3v + 1), not the -1 outside!"
+      },
+      {
+        id: "ws2-7",
+        worksheet: "ws2",
+        number: 7,
+        topic: "Standard #2: One-Variable Inequalities",
+        directions: "Solve the inequality and select its solution and graph.",
+        latex: "1 - 3p + p \\le -5",
+        type: "inequality-choice",
+        correctOption: 0,
+        options: [
+          { label: "p \\ge 3", desc: "Closed circle at 3, shaded right" },
+          { label: "p \\le 3", desc: "Closed circle at 3, shaded left" },
+          { label: "p > 3", desc: "Open circle at 3, shaded right" },
+          { label: "p \\ge -3", desc: "Closed circle at -3, shaded right" }
+        ],
+        graph: {
+          min: -1, max: 10,
+          type: "single",
+          val: 3, closed: true, dir: "right",
+          caption: "Closed circle at 3 and shaded to the right (p ≥ 3)."
+        },
+        hint: "Combine -3p + p to get 1 - 2p ≤ -5. When you divide by -2 at the end, remember the Golden Rule!",
+        steps: [
+          { math: "1 - 3p + p \\le -5", reason: "Given inequality" },
+          { math: "1 - 2p \\le -5", reason: "Combine Like Terms (CLT): -3p + 1p = -2p" },
+          { math: "-2p \\le -6", reason: "Subtract 1 from both sides (-5 - 1 = -6)" },
+          { math: "p \\ge 3", reason: "Divide by -2 and FLIP the inequality sign from \\le to \\ge" }
+        ],
+        takeaway: "Because we divided by -2, the ≤ sign flipped to ≥, making the graph shade to the right of 3!"
+      },
+      {
+        id: "ws2-8",
+        worksheet: "ws2",
+        number: 8,
+        topic: "Standard #2: One-Variable Inequalities",
+        directions: "Solve the inequality and select its solution and graph.",
+        latex: "3n + 2n > 5",
+        type: "inequality-choice",
+        correctOption: 0,
+        options: [
+          { label: "n > 1", desc: "Open circle at 1, shaded right" },
+          { label: "n \\ge 1", desc: "Closed circle at 1, shaded right" },
+          { label: "n < 1", desc: "Open circle at 1, shaded left" },
+          { label: "n > 0", desc: "Open circle at 0, shaded right" }
+        ],
+        graph: {
+          min: -7, max: 4,
+          type: "single",
+          val: 1, closed: false, dir: "right",
+          caption: "Open circle at 1 and shaded to the right (n > 1)."
+        },
+        hint: "Combine 3n + 2n = 5n, then divide both sides by 5.",
+        steps: [
+          { math: "3n + 2n > 5", reason: "Given inequality" },
+          { math: "5n > 5", reason: "Combine Like Terms (CLT): 3n + 2n = 5n" },
+          { math: "n > 1", reason: "Divide both sides by 5" }
+        ],
+        takeaway: "5 divided by 5 is 1 (not 0!), and since the symbol is strictly >, we put an open circle at 1."
+      },
+      {
+        id: "ws2-9",
+        worksheet: "ws2",
+        number: 9,
+        topic: "Standard #2: Compound Inequalities (OR)",
+        directions: "Solve the compound inequality and select its solution and graph.",
+        latex: "2n - 3 > 1 \\quad\\text{or}\\quad -2n + 2 \\ge 6",
+        type: "inequality-choice",
+        correctOption: 0,
+        options: [
+          { label: "n > 2 \\text{ or } n \\le -2", desc: "Closed at -2 shaded left; Open at 2 shaded right" },
+          { label: "n \\ge 2 \\text{ or } n < -2", desc: "Open at -2 shaded left; Closed at 2 shaded right" },
+          { label: "-2 \\le n < 2", desc: "Closed at -2, Open at 2, shaded between" },
+          { label: "n > 2 \\text{ or } n \\ge -2", desc: "Both shaded to the right" }
+        ],
+        graph: {
+          min: -7, max: 7,
+          type: "or",
+          leftVal: -2, leftClosed: true,
+          rightVal: 2, rightClosed: false,
+          caption: "Closed circle at -2 shaded left (n ≤ -2) OR open circle at 2 shaded right (n > 2)."
+        },
+        hint: "Notice the two different symbols: the first has '>' (open circle) and the second has '≥' (closed circle). Also flip the second sign when dividing by -2!",
+        steps: [
+          { math: "2n - 3 > 1 \\implies 2n > 4 \\implies n > 2", reason: "First inequality: add 3, then divide by 2" },
+          { math: "-2n + 2 \\ge 6 \\implies -2n \\ge 4", reason: "Second inequality: subtract 2 from both sides" },
+          { math: "n \\le -2", reason: "Divide by -2 and FLIP the inequality sign from \\ge to \\le" },
+          { math: "n > 2 \\text{ or } n \\le -2", reason: "Combine both parts with 'or'" }
+        ],
+        takeaway: "Pay close attention to each endpoint: -2 has a CLOSED circle (≤) while +2 has an OPEN circle (>)."
+      },
+      {
+        id: "ws2-10",
+        worksheet: "ws2",
+        number: 10,
+        topic: "Standard #2: Compound Inequalities (AND)",
+        directions: "Solve the compound inequality and select its solution and graph.",
+        latex: "2b + 1 \\le 5 \\quad\\text{and}\\quad 1 - 3b < 7",
+        type: "inequality-choice",
+        correctOption: 0,
+        options: [
+          { label: "-2 < b \\le 2", desc: "Open at -2, Closed at 2, shaded between" },
+          { label: "-2 \\le b < 2", desc: "Closed at -2, Open at 2, shaded between" },
+          { label: "b \\le 2 \\text{ or } b < -2", desc: "Shaded to the left" },
+          { label: "-2 < b < 2", desc: "Open circles at both -2 and 2, shaded between" }
+        ],
+        graph: {
+          min: -7, max: 5,
+          type: "and",
+          leftVal: -2, leftClosed: false,
+          rightVal: 2, rightClosed: true,
+          caption: "Open circle at -2, closed circle at 2, and shaded between (-2 < b ≤ 2)."
+        },
+        hint: "First inequality gives b ≤ 2. For 1 - 3b < 7, subtract 1 to get -3b < 6, then divide by -3 (flip the sign!).",
+        steps: [
+          { math: "2b + 1 \\le 5 \\implies 2b \\le 4 \\implies b \\le 2", reason: "First inequality: subtract 1, then divide by 2" },
+          { math: "1 - 3b < 7 \\implies -3b < 6", reason: "Second inequality: subtract 1 from both sides" },
+          { math: "b > -2", reason: "Divide by -3 and FLIP the sign from < to >" },
+          { math: "-2 < b \\le 2", reason: "Combine b > -2 and b \\le 2 into a compound inequality" }
+        ],
+        takeaway: "b > -2 is the same as -2 < b. Putting them together gives -2 < b ≤ 2."
+      },
+
+      // -----------------------------------------------------------------------
+      // WORKSHEET 3: Unit 1 Practice (ID: 1) — Pages 3–6 & 9 (Questions 1–26)
+      // -----------------------------------------------------------------------
+      // Part A: Special Solutions (#1-6)
+      {
+        id: "ws3-1",
+        worksheet: "ws3",
+        number: 1,
+        topic: "Special Equations: Number of Solutions",
+        directions: "Solve the equation and determine the number of solutions.",
+        latex: "-3(p - 1) = -3p",
+        type: "special-eq",
+        answer: "No solution",
+        hint: "Distribute -3 on the left side first, then add 3p to both sides. What happens to the variable p?",
+        steps: [
+          { math: "-3(p - 1) = -3p", reason: "Given equation" },
+          { math: "-3p + 3 = -3p", reason: "Distribute -3 into (p - 1)" },
+          { math: "3 = 0", reason: "Add 3p to both sides (the p-terms cancel out completely!)" },
+          { math: "\\text{No solution}", reason: "3 = 0 is a FALSE statement, so no value of p can ever make this equation true." }
+        ],
+        takeaway: "When variables cancel out completely and leave a FALSE statement (like 3 = 0), the answer is No Solution."
+      },
+      {
+        id: "ws3-2",
+        worksheet: "ws3",
+        number: 2,
+        topic: "Special Equations: Number of Solutions",
+        directions: "Solve the equation and determine the number of solutions.",
+        latex: "3 + 2m = 3(1 + m) - m",
+        type: "special-eq",
+        answer: "All real numbers",
+        hint: "Distribute 3 on the right side and combine the m-terms. Compare the left side and the right side!",
+        steps: [
+          { math: "3 + 2m = 3(1 + m) - m", reason: "Given equation" },
+          { math: "3 + 2m = 3 + 3m - m", reason: "Distribute 3 into (1 + m)" },
+          { math: "3 + 2m = 3 + 2m", reason: "Combine Like Terms on the right side: 3m - m = 2m" },
+          { math: "3 = 3", reason: "Subtract 2m from both sides (leaves a TRUE identity!)" },
+          { math: "\\{\\text{All real numbers}\\}", reason: "Since 3 = 3 is always true, every real number m is a solution." }
+        ],
+        takeaway: "When both sides simplify to the exact same expression (leading to a TRUE statement like 3 = 3), the solution is All Real Numbers."
+      },
+      {
+        id: "ws3-3",
+        worksheet: "ws3",
+        number: 3,
+        topic: "Special Equations: Number of Solutions",
+        directions: "Solve the equation and determine the number of solutions.",
+        latex: "-(x + 3) = -5 - x",
+        type: "special-eq",
+        answer: "No solution",
+        hint: "Distribute the negative sign (-1) across (x + 3), then add x to both sides.",
+        steps: [
+          { math: "-(x + 3) = -5 - x", reason: "Given equation" },
+          { math: "-x - 3 = -5 - x", reason: "Distribute -1 into (x + 3)" },
+          { math: "-3 = -5", reason: "Add x to both sides" },
+          { math: "\\text{No solution}", reason: "-3 = -5 is a FALSE statement, so there is No solution." }
+        ],
+        takeaway: "-(x + 3) becomes -x - 3. Once the -x terms cancel on both sides, we're left with -3 = -5 (False → No solution)."
+      },
+      {
+        id: "ws3-4",
+        worksheet: "ws3",
+        number: 4,
+        topic: "Special Equations: Number of Solutions",
+        directions: "Solve the equation and determine the number of solutions.",
+        latex: "-1 + 3x = -(1 - 3x) + 2",
+        type: "special-eq",
+        answer: "No solution",
+        hint: "Distribute the negative sign into -(1 - 3x) carefully: -1 + 3x + 2. Then simplify the right side!",
+        steps: [
+          { math: "-1 + 3x = -(1 - 3x) + 2", reason: "Given equation" },
+          { math: "-1 + 3x = -1 + 3x + 2", reason: "Distribute -1 into (1 - 3x)" },
+          { math: "-1 + 3x = 1 + 3x", reason: "Combine Like Terms on right: -1 + 2 = 1" },
+          { math: "-1 = 1", reason: "Subtract 3x from both sides" },
+          { math: "\\text{No solution}", reason: "-1 = 1 is FALSE, so there is No solution." }
+        ],
+        takeaway: "Even though both sides have +3x, the constants are -1 on the left and +1 on the right, so they can never be equal."
+      },
+      {
+        id: "ws3-5",
+        worksheet: "ws3",
+        number: 5,
+        topic: "Special Equations: Number of Solutions",
+        directions: "Solve the equation and determine the number of solutions.",
+        latex: "-3k + 3 = 3(1 - k)",
+        type: "special-eq",
+        answer: "All real numbers",
+        hint: "Distribute 3 into (1 - k) on the right side. Is 3 - 3k the same as -3k + 3?",
+        steps: [
+          { math: "-3k + 3 = 3(1 - k)", reason: "Given equation" },
+          { math: "-3k + 3 = 3 - 3k", reason: "Distribute 3 into (1 - k)" },
+          { math: "3 = 3", reason: "Add 3k to both sides" },
+          { math: "\\{\\text{All real numbers}\\}", reason: "3 = 3 is always TRUE, so the answer is All real numbers." }
+        ],
+        takeaway: "By the Commutative Property of Addition, 3 - 3k is identical to -3k + 3. Both sides match completely!"
+      },
+      {
+        id: "ws3-6",
+        worksheet: "ws3",
+        number: 6,
+        topic: "Special Equations: Number of Solutions",
+        directions: "Solve the equation and determine the number of solutions.",
+        latex: "2n + 4 = 2(n + 2) - 3",
+        type: "special-eq",
+        answer: "No solution",
+        hint: "Distribute 2 into (n + 2) on the right side, then subtract 3.",
+        steps: [
+          { math: "2n + 4 = 2(n + 2) - 3", reason: "Given equation" },
+          { math: "2n + 4 = 2n + 4 - 3", reason: "Distribute 2 into (n + 2)" },
+          { math: "2n + 4 = 2n + 1", reason: "Combine Like Terms on right: 4 - 3 = 1" },
+          { math: "4 = 1", reason: "Subtract 2n from both sides" },
+          { math: "\\text{No solution}", reason: "4 = 1 is FALSE, so there is No solution." }
+        ],
+        takeaway: "Watch out for the '- 3' at the end! Without it, both sides would be 2n + 4, but with it, 4 = 1 (No solution)."
+      },
+
+      // Part B: Literal Equations (#7-10)
+      {
+        id: "ws3-7",
+        worksheet: "ws3",
+        number: 7,
+        topic: "Literal Equations (Solving for a Variable)",
+        directions: "Solve the literal equation for the indicated variable: a",
+        latex: "g = b + c + a \\quad\\text{for } a",
+        type: "literal-eq",
+        targetVar: "a",
+        acceptedAnswers: ["g-b-c", "a=g-b-c", "-b-c+g", "a=-b-c+g", "g-c-b", "a=g-c-b"],
+        displayAnswer: "a = g - b - c",
+        options: [
+          "a = g - b - c",
+          "a = g + b + c",
+          "a = \\frac{g}{b + c}",
+          "a = b + c - g"
+        ],
+        hint: "To get 'a' by itself on the right side, undo '+ b' and '+ c' by subtracting b and c from both sides.",
+        steps: [
+          { math: "g = b + c + a", reason: "Given equation" },
+          { math: "g - b = c + a", reason: "Subtract b from both sides" },
+          { math: "g - b - c = a", reason: "Subtract c from both sides" },
+          { math: "a = g - b - c", reason: "Rewrite with the isolated variable a on the left" }
+        ],
+        takeaway: "Literal equations work just like number equations! Since b and c are added to a, we subtract both from g."
+      },
+      {
+        id: "ws3-8",
+        worksheet: "ws3",
+        number: 8,
+        topic: "Literal Equations (Solving for a Variable)",
+        directions: "Solve the literal equation for the indicated variable: x",
+        latex: "c - x = d + r \\quad\\text{for } x",
+        type: "literal-eq",
+        targetVar: "x",
+        acceptedAnswers: ["c-d-r", "x=c-d-r", "-d-r+c", "x=-d-r+c", "c-r-d", "x=c-r-d"],
+        displayAnswer: "x = c - d - r",
+        options: [
+          "x = c - d - r",
+          "x = d + r - c",
+          "x = d + r + c",
+          "x = \\frac{d + r}{c}"
+        ],
+        hint: "Notice the negative sign in front of x! Subtract c from both sides to get -x = d + r - c, then divide every term by -1.",
+        steps: [
+          { math: "c - x = d + r", reason: "Given equation" },
+          { math: "-x = d + r - c", reason: "Subtract c from both sides" },
+          { math: "x = -d - r + c", reason: "Divide (or multiply) every term on both sides by -1 to make x positive" },
+          { math: "x = c - d - r", reason: "Rearrange terms cleanly so the positive c leads" }
+        ],
+        takeaway: "Don't forget the minus sign on -x! Dividing by -1 flips the sign of EVERY term on the other side: -(d + r - c) = c - d - r."
+      },
+      {
+        id: "ws3-9",
+        worksheet: "ws3",
+        number: 9,
+        topic: "Literal Equations (Solving for a Variable)",
+        directions: "Solve the literal equation for the indicated variable: a",
+        latex: "am = n - p \\quad\\text{for } a",
+        type: "literal-eq",
+        targetVar: "a",
+        acceptedAnswers: ["(n-p)/m", "a=(n-p)/m"],
+        displayAnswer: "a = \\frac{n - p}{m}",
+        options: [
+          "a = \\frac{n - p}{m}",
+          "a = n - p - m",
+          "a = m(n - p)",
+          "a = \\frac{m}{n - p}"
+        ],
+        hint: "Since 'a' is multiplied by 'm', what opposite operation undoes multiplication?",
+        steps: [
+          { math: "am = n - p", reason: "Given equation" },
+          { math: "\\frac{am}{m} = \\frac{n - p}{m}", reason: "Divide both sides by m" },
+          { math: "a = \\frac{n - p}{m}", reason: "Simplify to isolate a" }
+        ],
+        takeaway: "To undo multiplication by m, divide the entire other side (n - p) by m."
+      },
+      {
+        id: "ws3-10",
+        worksheet: "ws3",
+        number: 10,
+        topic: "Literal Equations (Solving for a Variable)",
+        directions: "Solve the literal equation for the indicated variable: x",
+        latex: "g = xc - y \\quad\\text{for } x",
+        type: "literal-eq",
+        targetVar: "x",
+        acceptedAnswers: ["(g+y)/c", "x=(g+y)/c", "(y+g)/c", "x=(y+g)/c"],
+        displayAnswer: "x = \\frac{g + y}{c}",
+        options: [
+          "x = \\frac{g + y}{c}",
+          "x = \\frac{g - y}{c}",
+          "x = c(g + y)",
+          "x = \\frac{g}{c} + y"
+        ],
+        hint: "Two steps: first undo '- y' by adding y to both sides, then undo 'times c' by dividing both sides by c.",
+        steps: [
+          { math: "g = xc - y", reason: "Given equation" },
+          { math: "g + y = xc", reason: "Add y to both sides" },
+          { math: "\\frac{g + y}{c} = x", reason: "Divide both sides by c" },
+          { math: "x = \\frac{g + y}{c}", reason: "Rewrite with x on the left" }
+        ],
+        takeaway: "Just like solving 10 = 3x - 2 (add 2 first, then divide by 3), here we add y first, then divide the whole sum by c."
+      },
+
+      // Part C: Absolute Value Equations (#11-18)
+      {
+        id: "ws3-11",
+        worksheet: "ws3",
+        number: 11,
+        topic: "Absolute Value Equations",
+        directions: "Solve the absolute value equation. Enter both solutions (or choose No Solution).",
+        latex: "|-5v| = 5",
+        type: "abs-eq",
+        variable: "v",
+        hasSolution: true,
+        solutions: [-1, 1],
+        hint: "Split into two equations: -5v = 5 and -5v = -5, then solve both for v.",
+        steps: [
+          { math: "|-5v| = 5", reason: "Given equation (absolute value is already isolated)" },
+          { math: "-5v = 5 \\quad\\text{or}\\quad -5v = -5", reason: "Split into positive and negative cases" },
+          { math: "v = -1 \\quad\\text{or}\\quad v = 1", reason: "Divide both equations by -5" },
+          { math: "\\{-1, 1\\}", reason: "Solution set" }
+        ],
+        takeaway: "An expression inside absolute value bars can equal +5 or -5, giving two solutions: v = -1 and v = 1."
+      },
+      {
+        id: "ws3-12",
+        worksheet: "ws3",
+        number: 12,
+        topic: "Absolute Value Equations",
+        directions: "Solve the absolute value equation. Enter both solutions (or choose No Solution).",
+        latex: "|7 + p| = 9",
+        type: "abs-eq",
+        variable: "p",
+        hasSolution: true,
+        solutions: [2, -16],
+        hint: "Set up two cases: 7 + p = 9 and 7 + p = -9. Subtract 7 in both!",
+        steps: [
+          { math: "|7 + p| = 9", reason: "Given equation" },
+          { math: "7 + p = 9 \\quad\\text{or}\\quad 7 + p = -9", reason: "Split into two cases (+9 and -9)" },
+          { math: "p = 2 \\quad\\text{or}\\quad p = -16", reason: "Subtract 7 from both sides in each equation (9 - 7 = 2 and -9 - 7 = -16)" },
+          { math: "\\{2, -16\\}", reason: "Solution set" }
+        ],
+        takeaway: "Don't just take +2 and -2! You must solve 7 + p = -9 by subtracting 7, which gives -16."
+      },
+      {
+        id: "ws3-13",
+        worksheet: "ws3",
+        number: 13,
+        topic: "Absolute Value Equations",
+        directions: "Solve the absolute value equation. Enter both solutions (or choose No Solution).",
+        latex: "|n + 5| = 12",
+        type: "abs-eq",
+        variable: "n",
+        hasSolution: true,
+        solutions: [7, -17],
+        hint: "Split into n + 5 = 12 and n + 5 = -12, then subtract 5 from both.",
+        steps: [
+          { math: "|n + 5| = 12", reason: "Given equation" },
+          { math: "n + 5 = 12 \\quad\\text{or}\\quad n + 5 = -12", reason: "Split into two cases (+12 and -12)" },
+          { math: "n = 7 \\quad\\text{or}\\quad n = -17", reason: "Subtract 5 from both sides in each case" },
+          { math: "\\{7, -17\\}", reason: "Solution set" }
+        ],
+        takeaway: "Quick check: |7 + 5| = |12| = 12, and |-17 + 5| = |-12| = 12. Both work!"
+      },
+      {
+        id: "ws3-14",
+        worksheet: "ws3",
+        number: 14,
+        topic: "Absolute Value Equations",
+        directions: "Solve the absolute value equation. Enter both solutions (or choose No Solution).",
+        latex: "|10 + k| = 17",
+        type: "abs-eq",
+        variable: "k",
+        hasSolution: true,
+        solutions: [7, -27],
+        hint: "Split into 10 + k = 17 and 10 + k = -17, then subtract 10.",
+        steps: [
+          { math: "|10 + k| = 17", reason: "Given equation" },
+          { math: "10 + k = 17 \\quad\\text{or}\\quad 10 + k = -17", reason: "Split into two cases (+17 and -17)" },
+          { math: "k = 7 \\quad\\text{or}\\quad k = -27", reason: "Subtract 10 from both sides in each equation" },
+          { math: "\\{7, -27\\}", reason: "Solution set" }
+        ],
+        takeaway: "-17 minus 10 is -27. Always check both answers in the original absolute value bars!"
+      },
+      {
+        id: "ws3-15",
+        worksheet: "ws3",
+        number: 15,
+        topic: "Absolute Value Equations",
+        directions: "Solve the absolute value equation. Enter both solutions (or choose No Solution).",
+        latex: "2|r + 2| = 10",
+        type: "abs-eq",
+        variable: "r",
+        hasSolution: true,
+        solutions: [3, -7],
+        hint: "Isolate the absolute value bars FIRST by dividing both sides by 2 before splitting into two cases!",
+        steps: [
+          { math: "2|r + 2| = 10", reason: "Given equation" },
+          { math: "|r + 2| = 5", reason: "Divide both sides by 2 to isolate the absolute value" },
+          { math: "r + 2 = 5 \\quad\\text{or}\\quad r + 2 = -5", reason: "Split into two cases (+5 and -5)" },
+          { math: "r = 3 \\quad\\text{or}\\quad r = -7", reason: "Subtract 2 from both sides in each case" },
+          { math: "\\{3, -7\\}", reason: "Solution set" }
+        ],
+        takeaway: "Never distribute into absolute value bars! Instead, divide both sides by 2 first to get |r + 2| = 5."
+      },
+      {
+        id: "ws3-16",
+        worksheet: "ws3",
+        number: 16,
+        topic: "Absolute Value Equations",
+        directions: "Solve the absolute value equation. Enter both solutions (or choose No Solution).",
+        latex: "|k + 1| + 3 = 6",
+        type: "abs-eq",
+        variable: "k",
+        hasSolution: true,
+        solutions: [2, -4],
+        hint: "First subtract 3 from both sides to isolate |k + 1|, then split into two cases.",
+        steps: [
+          { math: "|k + 1| + 3 = 6", reason: "Given equation" },
+          { math: "|k + 1| = 3", reason: "Subtract 3 from both sides to isolate the absolute value" },
+          { math: "k + 1 = 3 \\quad\\text{or}\\quad k + 1 = -3", reason: "Split into two cases (+3 and -3)" },
+          { math: "k = 2 \\quad\\text{or}\\quad k = -4", reason: "Subtract 1 from both sides in each case" },
+          { math: "\\{2, -4\\}", reason: "Solution set" }
+        ],
+        takeaway: "Isolating |k + 1| first (6 - 3 = 3) makes the two cases super clean: k + 1 = 3 and k + 1 = -3."
+      },
+      {
+        id: "ws3-17",
+        worksheet: "ws3",
+        number: 17,
+        topic: "Absolute Value Equations",
+        directions: "Solve the absolute value equation. Enter both solutions (or choose No Solution).",
+        latex: "|2p| = -2",
+        type: "abs-eq",
+        variable: "p",
+        hasSolution: false,
+        solutions: [],
+        hint: "Look closely at the right side of the equals sign (-2). Can an absolute value ever equal a negative number?",
+        steps: [
+          { math: "|2p| = -2", reason: "Given equation" },
+          { math: "|2p| \\ge 0", reason: "Absolute value measures distance from zero and is always 0 or positive" },
+          { math: "\\text{No solution}", reason: "An absolute value cannot equal -2." }
+        ],
+        takeaway: "Whenever an isolated absolute value equals a negative number, stop right there — it has No Solution!"
+      },
+      {
+        id: "ws3-18",
+        worksheet: "ws3",
+        number: 18,
+        topic: "Absolute Value Equations",
+        directions: "Solve the absolute value equation. Enter both solutions (or choose No Solution).",
+        latex: "|-2p| = -4",
+        type: "abs-eq",
+        variable: "p",
+        hasSolution: false,
+        solutions: [],
+        hint: "Even though there is a -2 inside the bars, the absolute value bars make the left side non-negative. Can it equal -4?",
+        steps: [
+          { math: "|-2p| = -4", reason: "Given equation" },
+          { math: "|-2p| \\ge 0", reason: "The output of an absolute value is never negative" },
+          { math: "\\text{No solution}", reason: "Since -4 is negative, there is No solution." }
+        ],
+        takeaway: "Don't let the negative inside |-2p| trick you! The bars still make the entire left side ≥ 0, so it can never equal -4."
+      },
+
+      // Part D: Absolute Value Inequalities (#19-22)
+      {
+        id: "ws3-19",
+        worksheet: "ws3",
+        number: 19,
+        topic: "Absolute Value Inequalities",
+        directions: "Solve the absolute value inequality and select its solution and graph.",
+        latex: "|3n| + 1 \\le 7",
+        type: "inequality-choice",
+        correctOption: 0,
+        options: [
+          { label: "-2 \\le n \\le 2", desc: "Closed circles at -2 and 2, shaded between" },
+          { label: "n \\ge 2 \\text{ or } n \\le -2", desc: "Closed circles at -2 and 2, shaded outward" },
+          { label: "-2 < n < 2", desc: "Open circles at -2 and 2, shaded between" },
+          { label: "-6 \\le n \\le 6", desc: "Closed circles at -6 and 6, shaded between" }
+        ],
+        graph: {
+          min: -6, max: 6,
+          type: "and",
+          leftVal: -2, leftClosed: true,
+          rightVal: 2, rightClosed: true,
+          caption: "Closed circles at -2 and 2, shaded in between (-2 ≤ n ≤ 2)."
+        },
+        hint: "Subtract 1 first to get |3n| ≤ 6. Since it's 'less thAND' (≤), set up -6 ≤ 3n ≤ 6.",
+        steps: [
+          { math: "|3n| + 1 \\le 7", reason: "Given inequality" },
+          { math: "|3n| \\le 6", reason: "Subtract 1 from both sides to isolate the absolute value" },
+          { math: "-6 \\le 3n \\le 6", reason: "Rewrite 'less than or equal to' (\\le) as a compound 'AND' inequality" },
+          { math: "-2 \\le n \\le 2", reason: "Divide all three parts by 3" }
+        ],
+        takeaway: "Isolate |3n| first! Because |3n| ≤ 6 uses ≤ ('less thAND'), the solutions lie between -2 and 2."
+      },
+      {
+        id: "ws3-20",
+        worksheet: "ws3",
+        number: 20,
+        topic: "Absolute Value Inequalities",
+        directions: "Solve the absolute value inequality and select its solution and graph.",
+        latex: "-2|m - 3| > -10",
+        type: "inequality-choice",
+        correctOption: 0,
+        options: [
+          { label: "-2 < m < 8", desc: "Open circles at -2 and 8, shaded between" },
+          { label: "m > 8 \\text{ or } m < -2", desc: "Open circles at -2 and 8, shaded outward" },
+          { label: "-2 \\le m \\le 8", desc: "Closed circles at -2 and 8, shaded between" },
+          { label: "-8 < m < 2", desc: "Open circles at -8 and 2, shaded between" }
+        ],
+        graph: {
+          min: -4, max: 10,
+          type: "and",
+          leftVal: -2, leftClosed: false,
+          rightVal: 8, rightClosed: false,
+          caption: "Open circles at -2 and 8, shaded in between (-2 < m < 8)."
+        },
+        hint: "First divide both sides by -2 to isolate |m - 3|. What happens to the '>' sign when you divide by -2?",
+        steps: [
+          { math: "-2|m - 3| > -10", reason: "Given inequality" },
+          { math: "|m - 3| < 5", reason: "Divide both sides by -2 and FLIP the inequality sign from > to <" },
+          { math: "-5 < m - 3 < 5", reason: "Since it is now < ('less thAND'), write as a between inequality" },
+          { math: "-2 < m < 8", reason: "Add 3 to all three parts (-5 + 3 = -2 and 5 + 3 = 8)" }
+        ],
+        takeaway: "Crucial step: dividing by -2 at the start flips '>' into '<'! So it becomes a 'less thAND' inequality (-2 < m < 8)."
+      },
+      {
+        id: "ws3-21",
+        worksheet: "ws3",
+        number: 21,
+        topic: "Absolute Value Inequalities",
+        directions: "Solve the absolute value inequality and select its solution and graph.",
+        latex: "|2x| - 1 \\ge 5",
+        type: "inequality-choice",
+        correctOption: 0,
+        options: [
+          { label: "x \\ge 3 \\text{ or } x \\le -3", desc: "Closed circles at -3 and 3, shaded outward" },
+          { label: "-3 \\le x \\le 3", desc: "Closed circles at -3 and 3, shaded between" },
+          { label: "x > 3 \\text{ or } x < -3", desc: "Open circles at -3 and 3, shaded outward" },
+          { label: "x \\ge 2 \\text{ or } x \\le -2", desc: "Closed circles at -2 and 2, shaded outward" }
+        ],
+        graph: {
+          min: -6, max: 7,
+          type: "or",
+          leftVal: -3, leftClosed: true,
+          rightVal: 3, rightClosed: true,
+          caption: "Closed circle at -3 shaded left (x ≤ -3) OR closed circle at 3 shaded right (x ≥ 3)."
+        },
+        hint: "Add 1 to both sides first: |2x| ≥ 6. Since it's 'greatOR' (≥), split into 2x ≥ 6 OR 2x ≤ -6.",
+        steps: [
+          { math: "|2x| - 1 \\ge 5", reason: "Given inequality" },
+          { math: "|2x| \\ge 6", reason: "Add 1 to both sides to isolate the absolute value" },
+          { math: "2x \\ge 6 \\quad\\text{or}\\quad 2x \\le -6", reason: "Split 'greatOR' (\\ge) into two 'or' inequalities" },
+          { math: "x \\ge 3 \\quad\\text{or}\\quad x \\le -3", reason: "Divide both inequalities by 2" }
+        ],
+        takeaway: "When an isolated absolute value is ≥ a positive number ('greatOR'), the graph splits outward in opposite directions."
+      },
+      {
+        id: "ws3-22",
+        worksheet: "ws3",
+        number: 22,
+        topic: "Absolute Value Inequalities",
+        directions: "Solve the absolute value inequality and select its solution and graph.",
+        latex: "-3|x - 3| \\ge -12",
+        type: "inequality-choice",
+        correctOption: 0,
+        options: [
+          { label: "-1 \\le x \\le 7", desc: "Closed circles at -1 and 7, shaded between" },
+          { label: "x \\ge 7 \\text{ or } x \\le -1", desc: "Closed circles at -1 and 7, shaded outward" },
+          { label: "-1 < x < 7", desc: "Open circles at -1 and 7, shaded between" },
+          { label: "-7 \\le x \\le 1", desc: "Closed circles at -7 and 1, shaded between" }
+        ],
+        graph: {
+          min: -3, max: 9,
+          type: "and",
+          leftVal: -1, leftClosed: true,
+          rightVal: 7, rightClosed: true,
+          caption: "Closed circles at -1 and 7, shaded in between (-1 ≤ x ≤ 7)."
+        },
+        hint: "Divide both sides by -3 first! Dividing by -3 flips '≥' into '≤', giving |x - 3| ≤ 4.",
+        steps: [
+          { math: "-3|x - 3| \\ge -12", reason: "Given inequality" },
+          { math: "|x - 3| \\le 4", reason: "Divide both sides by -3 and FLIP the inequality sign from \\ge to \\le" },
+          { math: "-4 \\le x - 3 \\le 4", reason: "Since it is now \\le ('less thAND'), write as a compound between inequality" },
+          { math: "-1 \\le x \\le 7", reason: "Add 3 to all three parts (-4 + 3 = -1 and 4 + 3 = 7)" }
+        ],
+        takeaway: "Always isolate the absolute value BEFORE deciding if it's AND or OR! Dividing by -3 flipped ≥ to ≤."
+      },
+
+      // Part E: Proportions (#23-26)
+      {
+        id: "ws3-23",
+        worksheet: "ws3",
+        number: 23,
+        topic: "Solving Proportions",
+        directions: "Solve the proportion for n.",
+        latex: "\\frac{2}{4} = \\frac{n + 1}{2}",
+        type: "proportion",
+        variable: "n",
+        answer: 0,
+        hint: "Cross-multiply: multiply 2 · 2 on one diagonal and 4(n + 1) on the other diagonal!",
+        steps: [
+          { math: "\\frac{2}{4} = \\frac{n + 1}{2}", reason: "Given proportion" },
+          { math: "2 \\cdot 2 = 4(n + 1)", reason: "Cross-multiply across the equals sign" },
+          { math: "4 = 4n + 4", reason: "Simplify left side and distribute 4 on the right side" },
+          { math: "0 = 4n \\implies n = 0", reason: "Subtract 4 from both sides, then divide by 4" }
+        ],
+        takeaway: "You can also notice that 2/4 is equivalent to 1/2, so n + 1 must equal 1, meaning n = 0!"
+      },
+      {
+        id: "ws3-24",
+        worksheet: "ws3",
+        number: 24,
+        topic: "Solving Proportions",
+        directions: "Solve the proportion for x.",
+        latex: "\\frac{3}{2} = \\frac{x - 4}{4}",
+        type: "proportion",
+        variable: "x",
+        answer: 10,
+        hint: "Cross-multiply: 3 · 4 = 2(x - 4). Remember to distribute 2 to both x and -4!",
+        steps: [
+          { math: "\\frac{3}{2} = \\frac{x - 4}{4}", reason: "Given proportion" },
+          { math: "3 \\cdot 4 = 2(x - 4)", reason: "Cross-multiply" },
+          { math: "12 = 2x - 8", reason: "Multiply 3 · 4 = 12 and distribute 2 into (x - 4)" },
+          { math: "20 = 2x", reason: "Add 8 to both sides" },
+          { math: "x = 10", reason: "Divide both sides by 2" }
+        ],
+        takeaway: "When cross-multiplying with an expression like (x - 4), always put parentheses around it so you distribute properly: 2(x - 4) = 2x - 8."
+      },
+      {
+        id: "ws3-25",
+        worksheet: "ws3",
+        number: 25,
+        topic: "Solving Proportions",
+        directions: "Solve the proportion for n.",
+        latex: "\\frac{2}{4} = \\frac{4}{n - 3}",
+        type: "proportion",
+        variable: "n",
+        answer: 11,
+        hint: "Cross-multiply: 2(n - 3) = 4 · 4.",
+        steps: [
+          { math: "\\frac{2}{4} = \\frac{4}{n - 3}", reason: "Given proportion" },
+          { math: "2(n - 3) = 4 \\cdot 4", reason: "Cross-multiply" },
+          { math: "2n - 6 = 16", reason: "Distribute 2 on the left and multiply 4 · 4 on the right" },
+          { math: "2n = 22", reason: "Add 6 to both sides" },
+          { math: "n = 11", reason: "Divide both sides by 2" }
+        ],
+        takeaway: "Check your answer: if n = 11, then 4/(11 - 3) = 4/8 = 1/2, which matches 2/4!"
+      },
+      {
+        id: "ws3-26",
+        worksheet: "ws3",
+        number: 26,
+        topic: "Solving Proportions",
+        directions: "Solve the proportion for n.",
+        latex: "\\frac{n + 1}{3} = \\frac{4}{2}",
+        type: "proportion",
+        variable: "n",
+        answer: 5,
+        hint: "Cross-multiply: 2(n + 1) = 3 · 4 (or simplify 4/2 = 2 first!).",
+        steps: [
+          { math: "\\frac{n + 1}{3} = \\frac{4}{2}", reason: "Given proportion" },
+          { math: "2(n + 1) = 3 \\cdot 4", reason: "Cross-multiply" },
+          { math: "2n + 2 = 12", reason: "Distribute 2 into (n + 1) and multiply 3 · 4" },
+          { math: "2n = 10", reason: "Subtract 2 from both sides" },
+          { math: "n = 5", reason: "Divide both sides by 2" }
+        ],
+        takeaway: "Pro tip: Since 4/2 simplifies to 2, you can also solve (n + 1)/3 = 2 by multiplying both sides by 3 to get n + 1 = 6 → n = 5!"
+      }
+    ];
+
+    // =========================================================================
+    // STATE MANAGEMENT
+    // =========================================================================
+    let currentWorksheet = "ws1";
+    let currentIndex = 0; // Index within QUESTIONS array
+    let streak = 0;
+    // Map of question ID -> { status: 'correct' | 'incorrect', userState: {...} }
+    let progress = {};
+
+    // Temporary UI state for current question inputs
+    let selectedJustifications = new Set();
+    let selectedChoiceIndex = null;
+    let selectedSpecialChoice = null;
+    let absMode = "two"; // 'two' or 'none'
+
+    // =========================================================================
+    // INITIALIZATION & RENDERING
+    // =========================================================================
+    window.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      initScratchpad();
+      renderAll();
+    });
+
+    function renderMath(latex, element, displayMode = false) {
+      if (window.katex) {
+        katex.render(latex, element, {
+          throwOnError: false,
+          displayMode: displayMode
+        });
+      } else {
+        element.textContent = latex;
+      }
+    }
+
+    function renderAll() {
+      updateHeaderStats();
+      renderWorksheetTabs();
+      renderQuestionPills();
+      renderActiveQuestion();
+      lucide.createIcons();
+    }
+
+    function updateHeaderStats() {
+      const total = QUESTIONS.length;
+      const completedCount = Object.keys(progress).length;
+      document.getElementById("stat-completed").textContent = `${completedCount} / ${total}`;
+      document.getElementById("stat-streak").textContent = streak;
+
+      ["ws1", "ws2", "ws3"].forEach(ws => {
+        const wsQs = QUESTIONS.filter(q => q.worksheet === ws);
+        const wsDone = wsQs.filter(q => progress[q.id]).length;
+        document.getElementById(`badge-${ws}`).textContent = `${wsDone}/${wsQs.length}`;
+      });
+    }
+
+    function renderWorksheetTabs() {
+      ["ws1", "ws2", "ws3"].forEach(ws => {
+        const tab = document.getElementById(`tab-${ws}`);
+        if (ws === currentWorksheet) {
+          tab.className = "ws-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm";
+        } else {
+          tab.className = "ws-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-2 bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+        }
+      });
+
+      const titles = {
+        ws1: "Worksheet 1: Unit 1 Standard #1 & #2 Practice (ID: 1)",
+        ws2: "Worksheet 2: Unit 1 Standard #1 & #2 Practice (ID: 2)",
+        ws3: "Worksheet 3: Unit 1 Practice Packet (ID: 1)"
+      };
+      document.getElementById("ws-subtitle").textContent = titles[currentWorksheet];
+    }
+
+    function renderQuestionPills() {
+      const container = document.getElementById("question-pills");
+      container.innerHTML = "";
+      const wsQuestions = QUESTIONS.map((q, idx) => ({ q, idx })).filter(item => item.q.worksheet === currentWorksheet);
+
+      wsQuestions.forEach(({ q, idx }) => {
+        const btn = document.createElement("button");
+        const isCurrent = idx === currentIndex;
+        const p = progress[q.id];
+
+        let baseClasses = "w-9 h-9 rounded-xl font-bold text-xs shrink-0 flex items-center justify-center transition border ";
+        if (isCurrent) {
+          baseClasses += "ring-2 ring-indigo-600 ring-offset-1 ";
+        }
+
+        if (!p) {
+          baseClasses += isCurrent
+            ? "bg-indigo-600 text-white border-indigo-600"
+            : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100";
+        } else if (p.status === "correct") {
+          baseClasses += "bg-emerald-500 text-white border-emerald-600";
+        } else {
+          baseClasses += "bg-amber-500 text-white border-amber-600";
+        }
+
+        btn.className = baseClasses;
+        btn.textContent = q.number;
+        btn.onclick = () => {
+          currentIndex = idx;
+          resetTempInputState();
+          renderAll();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function resetTempInputState() {
+      selectedJustifications = new Set();
+      selectedChoiceIndex = null;
+      selectedSpecialChoice = null;
+      absMode = "two";
+      document.getElementById("hint-box").classList.add("hidden");
+      document.getElementById("scratch-text").value = "";
+    }
+
+    function renderActiveQuestion() {
+      const q = QUESTIONS[currentIndex];
+      const p = progress[q.id];
+
+      document.getElementById("q-number-badge").textContent = `Question #${q.number}`;
+      document.getElementById("q-topic-badge").textContent = q.topic;
+      document.getElementById("q-directions").textContent = q.directions;
+
+      // Status Pill
+      const statusPill = document.getElementById("q-status-pill");
+      if (!p) {
+        statusPill.textContent = "Awaiting Cyrus's Answer";
+        statusPill.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-slate-300";
+      } else if (p.status === "correct") {
+        statusPill.textContent = "Answered Correctly ✓";
+        statusPill.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+      } else {
+        statusPill.textContent = "Reviewed Solution";
+        statusPill.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40";
+      }
+
+      // Render main math problem
+      const mathEl = document.getElementById("q-math-display");
+      renderMath(q.latex, mathEl, true);
+
+      // Build input controls based on question type
+      const inputContainer = document.getElementById("q-input-container");
+      inputContainer.innerHTML = "";
+
+      if (q.type === "equation-justify") {
+        renderEquationJustifyInput(q, inputContainer);
+      } else if (q.type === "inequality-choice") {
+        renderInequalityChoiceInput(q, inputContainer);
+      } else if (q.type === "special-eq") {
+        renderSpecialEqInput(q, inputContainer);
+      } else if (q.type === "literal-eq") {
+        renderLiteralEqInput(q, inputContainer);
+      } else if (q.type === "abs-eq") {
+        renderAbsEqInput(q, inputContainer);
+      } else if (q.type === "proportion") {
+        renderProportionInput(q, inputContainer);
+      }
+
+      // Prev / Next button states
+      document.getElementById("btn-prev").disabled = currentIndex === 0;
+      document.getElementById("btn-next").disabled = currentIndex === QUESTIONS.length - 1;
+
+      // Explanation panel visibility
+      const expPanel = document.getElementById("explanation-panel");
+      if (p) {
+        populateExplanationPanel(q, p);
+        expPanel.classList.remove("hidden");
+      } else {
+        expPanel.classList.add("hidden");
+      }
+    }
+
+    // =========================================================================
+    // INPUT RENDERERS FOR EACH QUESTION ARCHETYPE
+    // =========================================================================
+
+    // 1. Standard #1: Equation + Justification Checkboxes
+    function renderEquationJustifyInput(q, container) {
+      const saved = progress[q.id]?.userState;
+      if (saved && saved.justifications) {
+        selectedJustifications = new Set(saved.justifications);
+      }
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "space-y-4";
+
+      // Numeric solution row
+      const solDiv = document.createElement("div");
+      solDiv.className = "bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-4";
+      solDiv.innerHTML = `
+        <div>
+          <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-0.5">Step 1: Enter Your Solution</label>
+          <p class="text-xs text-slate-500">Type the numerical value for <span class="mono font-bold text-slate-800">${q.variable}</span></p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="mono font-bold text-lg text-slate-800">${q.variable} =</span>
+          <input type="number" step="any" id="input-eq-val" value="${saved?.val ?? ''}" placeholder="?" 
+            onkeydown="if(event.key==='Enter') checkAnswer()"
+            class="w-28 px-3.5 py-2 text-lg font-bold mono text-center rounded-xl border-2 border-slate-300 focus:border-indigo-600 focus:outline-none bg-white" />
+        </div>
+      `;
+      wrapper.appendChild(solDiv);
+
+      // Justifications row
+      const justDiv = document.createElement("div");
+      justDiv.className = "bg-slate-50 p-4 rounded-xl border border-slate-200";
+      justDiv.innerHTML = `
+        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-1">Step 2: Select Justifications Used (Standard #1)</label>
+        <p class="text-xs text-slate-500 mb-3">Which algebraic properties are needed to solve this equation? (Select all that apply)</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="just-buttons"></div>
+      `;
+      wrapper.appendChild(justDiv);
+      container.appendChild(wrapper);
+
+      const justOptions = [
+        { key: "Distribution", label: "Distribution", sub: "Multiply across ( )" },
+        { key: "CLT", label: "Combine Like Terms (CLT)", sub: "Same-side terms" },
+        { key: "POE", label: "Property of Equality (POE)", sub: "Both-sides operations" }
+      ];
+
+      const btnGrid = justDiv.querySelector("#just-buttons");
+      justOptions.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        const active = selectedJustifications.has(opt.key);
+        btn.className = active
+          ? "p-3 rounded-xl border-2 border-indigo-600 bg-indigo-50/80 text-left transition flex items-start justify-between"
+          : "p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition flex items-start justify-between";
+        btn.innerHTML = `
+          <div>
+            <div class="font-bold text-xs text-slate-900">${opt.label}</div>
+            <div class="text-[11px] text-slate-500 mt-0.5">${opt.sub}</div>
+          </div>
+          <div class="w-5 h-5 rounded-md flex items-center justify-center ${active ? 'bg-indigo-600 text-white' : 'border border-slate-300 bg-slate-50'}">
+            ${active ? '✓' : ''}
+          </div>
+        `;
+        btn.onclick = () => {
+          if (selectedJustifications.has(opt.key)) {
+            selectedJustifications.delete(opt.key);
+          } else {
+            selectedJustifications.add(opt.key);
+          }
+          renderEquationJustifyInput(q, container);
+        };
+        btnGrid.appendChild(btn);
+      });
+      // Prevent duplicate append on re-render
+      if (container.children.length > 1) {
+        container.removeChild(container.firstChild);
+      }
+    }
+
+    // 2. Inequalities: Interactive Option Cards
+    function renderInequalityChoiceInput(q, container) {
+      const saved = progress[q.id]?.userState;
+      if (saved && saved.choiceIndex !== undefined && selectedChoiceIndex === null) {
+        selectedChoiceIndex = saved.choiceIndex;
+      }
+
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = `
+        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-2">Select the Correct Inequality Solution & Graph Description:</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="ineq-options-grid"></div>
+      `;
+      container.innerHTML = "";
+      container.appendChild(wrapper);
+
+      const grid = wrapper.querySelector("#ineq-options-grid");
+      q.options.forEach((opt, idx) => {
+        const isSelected = selectedChoiceIndex === idx;
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = isSelected
+          ? "p-4 rounded-xl border-2 border-indigo-600 bg-indigo-50/70 text-left transition flex flex-col justify-between shadow-sm"
+          : "p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition flex flex-col justify-between";
+
+        const topRow = document.createElement("div");
+        topRow.className = "flex items-center justify-between w-full mb-1.5";
+        const mathSpan = document.createElement("span");
+        mathSpan.className = "text-base font-bold text-slate-900";
+        renderMath(opt.label, mathSpan, false);
+
+        const radio = document.createElement("span");
+        radio.className = `w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+          isSelected ? "bg-indigo-600 text-white" : "border-2 border-slate-300"
+        }`;
+        radio.textContent = isSelected ? "✓" : "";
+
+        topRow.appendChild(mathSpan);
+        topRow.appendChild(radio);
+
+        const descP = document.createElement("p");
+        descP.className = "text-xs text-slate-600 font-medium";
+        descP.textContent = opt.desc;
+
+        card.appendChild(topRow);
+        card.appendChild(descP);
+
+        card.onclick = () => {
+          selectedChoiceIndex = idx;
+          renderInequalityChoiceInput(q, container);
+        };
+        grid.appendChild(card);
+      });
+    }
+
+    // 3. Special Equations (No solution vs All real numbers)
+    function renderSpecialEqInput(q, container) {
+      const saved = progress[q.id]?.userState;
+      if (saved && saved.choice && !selectedSpecialChoice) {
+        selectedSpecialChoice = saved.choice;
+      }
+
+      const choices = [
+        { val: "No solution", title: "No Solution", desc: "Variables cancel and leave a FALSE statement (e.g., 3 = 0)" },
+        { val: "All real numbers", title: "{ All Real Numbers }", desc: "Both sides are identical and leave a TRUE statement (e.g., 3 = 3)" }
+      ];
+
+      container.innerHTML = `
+        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-2">Simplify both sides and choose the outcome:</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="special-grid"></div>
+      `;
+      const grid = container.querySelector("#special-grid");
+
+      choices.forEach(c => {
+        const active = selectedSpecialChoice === c.val;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = active
+          ? "p-4 rounded-xl border-2 border-indigo-600 bg-indigo-50/70 text-left transition"
+          : "p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-slate-300 text-left transition";
+        btn.innerHTML = `
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-extrabold text-sm text-slate-900">${c.title}</span>
+            <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs ${active ? 'bg-indigo-600 text-white' : 'border-2 border-slate-300'}">${active ? '✓' : ''}</span>
+          </div>
+          <p class="text-xs text-slate-500">${c.desc}</p>
+        `;
+        btn.onclick = () => {
+          selectedSpecialChoice = c.val;
+          renderSpecialEqInput(q, container);
+        };
+        grid.appendChild(btn);
+      });
+    }
+
+    // 4. Literal Equations (Multiple Choice + Optional Algebraic Input)
+    function renderLiteralEqInput(q, container) {
+      const saved = progress[q.id]?.userState;
+      if (saved && saved.choiceIndex !== undefined && selectedChoiceIndex === null) {
+        selectedChoiceIndex = saved.choiceIndex;
+      }
+
+      container.innerHTML = `
+        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-2">Isolate <span class="mono text-indigo-600">${q.targetVar}</span> and select your result:</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="literal-grid"></div>
+      `;
+      const grid = container.querySelector("#literal-grid");
+
+      q.options.forEach((latexOpt, idx) => {
+        const active = selectedChoiceIndex === idx;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = active
+          ? "p-4 rounded-xl border-2 border-indigo-600 bg-indigo-50/70 flex items-center justify-between transition"
+          : "p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-slate-300 flex items-center justify-between transition";
+
+        const mathSpan = document.createElement("span");
+        mathSpan.className = "text-lg font-bold text-slate-900";
+        renderMath(latexOpt, mathSpan, false);
+
+        const indicator = document.createElement("span");
+        indicator.className = `w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+          active ? "bg-indigo-600 text-white" : "border-2 border-slate-300"
+        }`;
+        indicator.textContent = active ? "✓" : "";
+
+        btn.appendChild(mathSpan);
+        btn.appendChild(indicator);
+        btn.onclick = () => {
+          selectedChoiceIndex = idx;
+          renderLiteralEqInput(q, container);
+        };
+        grid.appendChild(btn);
+      });
+    }
+
+    // 5. Absolute Value Equations (Two Solutions or No Solution toggle)
+    function renderAbsEqInput(q, container) {
+      const saved = progress[q.id]?.userState;
+      if (saved && saved.mode) {
+        absMode = saved.mode;
+      }
+
+      container.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex items-center gap-2">
+            <button type="button" id="abs-mode-two" class="px-4 py-2 rounded-xl text-xs font-bold border-2 transition ${
+              absMode === 'two' ? 'border-indigo-600 bg-indigo-50 text-indigo-800' : 'border-slate-200 bg-white text-slate-600'
+            }">
+              Two Solutions { , }
+            </button>
+            <button type="button" id="abs-mode-none" class="px-4 py-2 rounded-xl text-xs font-bold border-2 transition ${
+              absMode === 'none' ? 'border-rose-600 bg-rose-50 text-rose-800' : 'border-slate-200 bg-white text-slate-600'
+            }">
+              No Solution
+            </button>
+          </div>
+
+          <div id="abs-two-inputs" class="${absMode === 'two' ? 'block' : 'hidden'} bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-2">Enter both solutions for <span class="mono">${q.variable}</span> (in any order):</label>
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="flex items-center gap-2">
+                <span class="mono font-bold text-slate-700">${q.variable}₁ =</span>
+                <input type="number" step="any" id="abs-val-1" value="${saved?.v1 ?? ''}" placeholder="?" class="w-24 px-3 py-2 text-base font-bold mono text-center rounded-xl border-2 border-slate-300 focus:border-indigo-600 focus:outline-none bg-white" />
+              </div>
+              <span class="text-slate-400 font-bold">and</span>
+              <div class="flex items-center gap-2">
+                <span class="mono font-bold text-slate-700">${q.variable}₂ =</span>
+                <input type="number" step="any" id="abs-val-2" value="${saved?.v2 ?? ''}" placeholder="?" onkeydown="if(event.key==='Enter') checkAnswer()" class="w-24 px-3 py-2 text-base font-bold mono text-center rounded-xl border-2 border-slate-300 focus:border-indigo-600 focus:outline-none bg-white" />
+              </div>
+            </div>
+          </div>
+
+          <div id="abs-none-msg" class="${absMode === 'none' ? 'block' : 'hidden'} bg-rose-50/70 p-4 rounded-xl border border-rose-200 text-xs text-rose-900 font-medium">
+            You selected <strong>No Solution</strong> because an isolated absolute value cannot equal a negative number. Click <strong>Check Answer</strong> to verify!
+          </div>
+        </div>
+      `;
+
+      container.querySelector("#abs-mode-two").onclick = () => {
+        absMode = "two";
+        renderAbsEqInput(q, container);
+      };
+      container.querySelector("#abs-mode-none").onclick = () => {
+        absMode = "none";
+        renderAbsEqInput(q, container);
+      };
+    }
+
+    // 6. Proportions (Single Numeric Solution)
+    function renderProportionInput(q, container) {
+      const saved = progress[q.id]?.userState;
+      container.innerHTML = `
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-0.5">Cross-Multiply & Solve</label>
+            <p class="text-xs text-slate-500">Enter the value of <span class="mono font-bold text-slate-800">${q.variable}</span></p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="mono font-bold text-lg text-slate-800">${q.variable} =</span>
+            <input type="number" step="any" id="input-prop-val" value="${saved?.val ?? ''}" placeholder="?"
+              onkeydown="if(event.key==='Enter') checkAnswer()"
+              class="w-28 px-3.5 py-2 text-lg font-bold mono text-center rounded-xl border-2 border-slate-300 focus:border-indigo-600 focus:outline-none bg-white" />
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // ANSWER CHECKING & EXPLANATION DISPLAY
+    // =========================================================================
+    function checkAnswer() {
+      const q = QUESTIONS[currentIndex];
+      let isCorrect = false;
+      let userState = {};
+      let feedbackMsg = "";
+
+      if (q.type === "equation-justify") {
+        const rawVal = document.getElementById("input-eq-val").value.trim();
+        if (rawVal === "") {
+          alert(`Hey Cyrus! Enter a number for ${q.variable} before checking.`);
+          return;
+        }
+        const numVal = parseFloat(rawVal);
+        const valCorrect = Math.abs(numVal - q.answer) < 1e-6;
+
+        const expectedJust = new Set(q.justifications);
+        const justMatch =
+          expectedJust.size === selectedJustifications.size &&
+          [...expectedJust].every(j => selectedJustifications.has(j));
+
+        isCorrect = valCorrect && justMatch;
+        userState = { val: rawVal, justifications: [...selectedJustifications] };
+
+        if (valCorrect && !justMatch) {
+          feedbackMsg = `Your value ${q.variable} = ${q.answer} is right! Take a look at the exact justifications (${q.justifications.join(", ")}) below.`;
+        } else if (!valCorrect && justMatch) {
+          feedbackMsg = `Great job identifying the justifications (${q.justifications.join(", ")})! Let's check the arithmetic for ${q.variable} below.`;
+        }
+      } else if (q.type === "inequality-choice" || q.type === "literal-eq") {
+        if (selectedChoiceIndex === null) {
+          alert("Hey Cyrus! Click one of the solution choices first.");
+          return;
+        }
+        isCorrect = selectedChoiceIndex === (q.correctOption ?? 0);
+        userState = { choiceIndex: selectedChoiceIndex };
+      } else if (q.type === "special-eq") {
+        if (!selectedSpecialChoice) {
+          alert("Hey Cyrus! Select either 'No Solution' or '{ All Real Numbers }' first.");
+          return;
+        }
+        isCorrect = selectedSpecialChoice === q.answer;
+        userState = { choice: selectedSpecialChoice };
+      } else if (q.type === "abs-eq") {
+        if (absMode === "none") {
+          isCorrect = !q.hasSolution;
+          userState = { mode: "none" };
+        } else {
+          const v1Raw = document.getElementById("abs-val-1").value.trim();
+          const v2Raw = document.getElementById("abs-val-2").value.trim();
+          if (v1Raw === "" || v2Raw === "") {
+            alert("Enter both solutions (or switch to 'No Solution' if it has none)!");
+            return;
+          }
+          const v1 = parseFloat(v1Raw);
+          const v2 = parseFloat(v2Raw);
+          if (q.hasSolution) {
+            const [s1, s2] = q.solutions;
+            isCorrect =
+              (Math.abs(v1 - s1) < 1e-6 && Math.abs(v2 - s2) < 1e-6) ||
+              (Math.abs(v1 - s2) < 1e-6 && Math.abs(v2 - s1) < 1e-6);
+          } else {
+            isCorrect = false;
+          }
+          userState = { mode: "two", v1: v1Raw, v2: v2Raw };
+        }
+      } else if (q.type === "proportion") {
+        const rawVal = document.getElementById("input-prop-val").value.trim();
+        if (rawVal === "") {
+          alert(`Hey Cyrus! Enter a value for ${q.variable} first.`);
+          return;
+        }
+        const numVal = parseFloat(rawVal);
+        isCorrect = Math.abs(numVal - q.answer) < 1e-6;
+        userState = { val: rawVal };
+      }
+
+      // Update streak & progress
+      if (isCorrect) {
+        streak++;
+      } else {
+        streak = 0;
+      }
+
+      progress[q.id] = {
+        status: isCorrect ? "correct" : "incorrect",
+        userState,
+        customFeedback: feedbackMsg
+      };
+
+      renderAll();
+
+      // Smooth scroll to explanation panel
+      setTimeout(() => {
+        document.getElementById("explanation-panel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 100);
+    }
+
+    function populateExplanationPanel(q, p) {
+      const banner = document.getElementById("feedback-banner");
+      const iconBox = document.getElementById("feedback-icon");
+      const titleEl = document.getElementById("feedback-title");
+      const subEl = document.getElementById("feedback-subtitle");
+      const badgeEl = document.getElementById("correct-answer-badge");
+
+      if (p.status === "correct") {
+        banner.className = "px-6 py-4 flex flex-wrap items-center justify-between gap-3 bg-emerald-600 text-white";
+        iconBox.className = "w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold";
+        iconBox.innerHTML = "✓";
+        titleEl.textContent = "Awesome work, Cyrus! Spot on!";
+        subEl.textContent = "Review the step-by-step breakdown below before moving to the next question.";
+      } else {
+        banner.className = "px-6 py-4 flex flex-wrap items-center justify-between gap-3 bg-amber-500 text-white";
+        iconBox.className = "w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold";
+        iconBox.innerHTML = "!";
+        titleEl.textContent = "Let's walk through this one together!";
+        subEl.textContent = p.customFeedback || "Check out each step and justification below so you can master the pattern.";
+      }
+
+      // Format correct answer badge
+      if (q.type === "equation-justify") {
+        renderMath(`${q.variable} = ${q.answer} \\;(\\text{${q.justifications.join(", ")}})`, badgeEl, false);
+      } else if (q.type === "inequality-choice") {
+        renderMath(q.options[q.correctOption].label, badgeEl, false);
+      } else if (q.type === "special-eq") {
+        badgeEl.textContent = q.answer;
+      } else if (q.type === "literal-eq") {
+        renderMath(q.displayAnswer, badgeEl, false);
+      } else if (q.type === "abs-eq") {
+        if (q.hasSolution) {
+          renderMath(`\\{${q.solutions[0]},\\, ${q.solutions[1]}\\}`, badgeEl, false);
+        } else {
+          badgeEl.textContent = "No solution";
+        }
+      } else if (q.type === "proportion") {
+        renderMath(`${q.variable} = ${q.answer}`, badgeEl, false);
+      }
+
+      // Render Number Line SVG if inequality
+      const graphSection = document.getElementById("graph-section");
+      if (q.graph) {
+        graphSection.classList.remove("hidden");
+        drawNumberLineSVG(q.graph);
+        document.getElementById("graph-caption").textContent = q.graph.caption;
+      } else {
+        graphSection.classList.add("hidden");
+      }
+
+      // Render Step-by-Step cards
+      const stepsContainer = document.getElementById("steps-container");
+      stepsContainer.innerHTML = "";
+      q.steps.forEach((step, i) => {
+        const row = document.createElement("div");
+        row.className = "p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2";
+
+        const left = document.createElement("div");
+        left.className = "flex items-center gap-3";
+        const numBadge = document.createElement("span");
+        numBadge.className = "w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-extrabold text-xs flex items-center justify-center shrink-0";
+        numBadge.textContent = i + 1;
+
+        const mathSpan = document.createElement("div");
+        mathSpan.className = "font-bold text-slate-900 text-base";
+        renderMath(step.math, mathSpan, false);
+
+        left.appendChild(numBadge);
+        left.appendChild(mathSpan);
+
+        const right = document.createElement("div");
+        right.className = "text-xs font-semibold text-indigo-900 bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100 sm:text-right";
+        right.textContent = step.reason;
+
+        row.appendChild(left);
+        row.appendChild(right);
+        stepsContainer.appendChild(row);
+      });
+
+      document.getElementById("takeaway-text").textContent = q.takeaway;
+    }
+
+    // =========================================================================
+    // DYNAMIC SVG NUMBER LINE RENDERER
+    // =========================================================================
+    function drawNumberLineSVG(g) {
+      const svg = document.getElementById("number-line-svg");
+      svg.innerHTML = "";
+
+      const width = 600;
+      const y = 45;
+      const pad = 45;
+      const usableW = width - pad * 2;
+      const min = g.min;
+      const max = g.max;
+      const span = max - min;
+
+      const valToX = val => pad + ((val - min) / span) * usableW;
+
+      // Base black axis line with arrows
+      let html = `
+        <defs>
+          <marker id="arrow-left-blue" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto">
+            <path d="M8,0 L0,4 L8,8 Z" fill="#2563eb" />
+          </marker>
+          <marker id="arrow-right-blue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#2563eb" />
+          </marker>
+        </defs>
+        <line x1="20" y1="${y}" x2="580" y2="${y}" stroke="#334155" stroke-width="2" />
+        <polygon points="15,${y} 25,${y - 5} 25,${y + 5}" fill="#334155" />
+        <polygon points="585,${y} 575,${y - 5} 575,${y + 5}" fill="#334155" />
+      `;
+
+      // Tick marks and integer labels
+      for (let v = min; v <= max; v++) {
+        const x = valToX(v);
+        html += `
+          <line x1="${x}" y1="${y - 6}" x2="${x}" y2="${y + 6}" stroke="#334155" stroke-width="1.5" />
+          <text x="${x}" y="${y + 24}" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">${v}</text>
+        `;
+      }
+
+      // Draw Blue Solution Shading & Endpoint Circles
+      if (g.type === "single") {
+        const cx = valToX(g.val);
+        if (g.dir === "right") {
+          html += `<line x1="${cx}" y1="${y}" x2="580" y2="${y}" stroke="#2563eb" stroke-width="5" />`;
+          html += `<polygon points="588,${y} 574,${y - 7} 574,${y + 7}" fill="#2563eb" />`;
+        } else {
+          html += `<line x1="${cx}" y1="${y}" x2="20" y2="${y}" stroke="#2563eb" stroke-width="5" />`;
+          html += `<polygon points="12,${y} 26,${y - 7} 26,${y + 7}" fill="#2563eb" />`;
+        }
+        html += `<circle cx="${cx}" cy="${y}" r="7" fill="${g.closed ? '#2563eb' : '#ffffff'}" stroke="#2563eb" stroke-width="3" />`;
+      } else if (g.type === "and") {
+        const x1 = valToX(g.leftVal);
+        const x2 = valToX(g.rightVal);
+        html += `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#2563eb" stroke-width="5" />`;
+        html += `<circle cx="${x1}" cy="${y}" r="7" fill="${g.leftClosed ? '#2563eb' : '#ffffff'}" stroke="#2563eb" stroke-width="3" />`;
+        html += `<circle cx="${x2}" cy="${y}" r="7" fill="${g.rightClosed ? '#2563eb' : '#ffffff'}" stroke="#2563eb" stroke-width="3" />`;
+      } else if (g.type === "or") {
+        const x1 = valToX(g.leftVal);
+        const x2 = valToX(g.rightVal);
+        // Left ray
+        html += `<line x1="${x1}" y1="${y}" x2="20" y2="${y}" stroke="#2563eb" stroke-width="5" />`;
+        html += `<polygon points="12,${y} 26,${y - 7} 26,${y + 7}" fill="#2563eb" />`;
+        // Right ray
+        html += `<line x1="${x2}" y1="${y}" x2="580" y2="${y}" stroke="#2563eb" stroke-width="5" />`;
+        html += `<polygon points="588,${y} 574,${y - 7} 574,${y + 7}" fill="#2563eb" />`;
+        // Endpoints
+        html += `<circle cx="${x1}" cy="${y}" r="7" fill="${g.leftClosed ? '#2563eb' : '#ffffff'}" stroke="#2563eb" stroke-width="3" />`;
+        html += `<circle cx="${x2}" cy="${y}" r="7" fill="${g.rightClosed ? '#2563eb' : '#ffffff'}" stroke="#2563eb" stroke-width="3" />`;
+      }
+
+      svg.innerHTML = html;
+    }
+
+    // =========================================================================
+    // NAVIGATION & UTILITY CONTROLS
+    // =========================================================================
+    function switchWorksheet(ws) {
+      currentWorksheet = ws;
+      const firstIdx = QUESTIONS.findIndex(q => q.worksheet === ws);
+      currentIndex = firstIdx !== -1 ? firstIdx : 0;
+      resetTempInputState();
+      renderAll();
+    }
+
+    function nextQuestion() {
+      if (currentIndex < QUESTIONS.length - 1) {
+        currentIndex++;
+        currentWorksheet = QUESTIONS[currentIndex].worksheet;
+        resetTempInputState();
+        renderAll();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        currentWorksheet = QUESTIONS[currentIndex].worksheet;
+        resetTempInputState();
+        renderAll();
+      }
+    }
+
+    function toggleHint() {
+      const q = QUESTIONS[currentIndex];
+      const box = document.getElementById("hint-box");
+      document.getElementById("hint-text").textContent = q.hint;
+      box.classList.toggle("hidden");
+    }
+
+    function resetAllProgress() {
+      if (confirm("Reset all of Cyrus's progress and start fresh?")) {
+        progress = {};
+        streak = 0;
+        resetTempInputState();
+        renderAll();
+      }
+    }
+
+    // =========================================================================
+    // INTERACTIVE SCRATCHPAD CANVAS
+    // =========================================================================
+    let canvas, ctx, drawing = false, penColor = "#0f172a";
+
+    function initScratchpad() {
+      canvas = document.getElementById("scratchpad");
+      ctx = canvas.getContext("2d");
+
+      const resizeCanvas = () => {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = penColor;
+      };
+
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      const getPos = e => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      };
+
+      const startDraw = e => {
+        drawing = true;
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      };
+
+      const moveDraw = e => {
+        if (!drawing) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+      };
+
+      const endDraw = () => {
+        drawing = false;
+      };
+
+      canvas.addEventListener("mousedown", startDraw);
+      canvas.addEventListener("mousemove", moveDraw);
+      window.addEventListener("mouseup", endDraw);
+
+      canvas.addEventListener("touchstart", startDraw, { passive: false });
+      canvas.addEventListener("touchmove", moveDraw, { passive: false });
+      window.addEventListener("touchend", endDraw);
+    }
+
+    function setPenColor(color) {
+      penColor = color;
+      if (ctx) ctx.strokeStyle = color;
+    }
+
+    function clearScratchpad() {
+      if (ctx && canvas) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+  </script>
+</body>
+</html>
